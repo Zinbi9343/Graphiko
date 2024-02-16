@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Line Chart and Table</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            text-align: center;
+        }
+
+        .logo {
+            margin-bottom: 20px;
+        }
+
+        .table-container {
+            margin-bottom: 10px; /* Adjusted margin */
+        }
+
+        #data-table {
+            width: 80%; /* Reduced table width */
+            margin: 0 auto; /* Center align the table */
+        }
+
+        #data-table th, #data-table td {
+            padding: 5px; /* Reduced padding */
+        }
+
+        #data-table input[type="text"] {
+            width: calc(100% - 20px); /* Adjusted input width */
+            padding: 5px; /* Adjusted padding */
+            box-sizing: border-box; /* Box sizing adjustment */
+        }
+
+      #save-btn,  #add-row-btn, #graph-btn {
+            padding: 8px 16px; /* Adjusted button padding */
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        #add-row-btn:hover, #graph-btn:hover {
+            background-color: #45a049;
+        }
+
+        #canvas-container {
+            margin-top: 20px; /* Space between buttons and canvas */
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto; /* Center the canvas */
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="table-container">
+        <table id="data-table">
+            <thead>
+            <tr>
+                <th>X Axis</th>
+                <th>Y Axis</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><input type="text" class="x-axis"/></td>
+                <td><input type="text" class="y-axis"/></td>
+            </tr>
+            </tbody>
+        </table>
+        <button id="add-row-btn">➕ Add Row</button>
+    </div>
+    <button id="graph-btn">📈 Graph It</button>
+    <button id="save-btn">💾 Save(jpg)</button>
+    </div>
+<div id="canvas-container">
+    <canvas id="line-chart" width="400" height="400"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.getElementById("add-row-btn").addEventListener("click", function () {
+        var table = document.getElementById("data-table").getElementsByTagName("tbody")[0];
+        var newRow = table.insertRow();
+        var cell1 = newRow.insertCell(0);
+        var cell2 = newRow.insertCell(1);
+        cell1.innerHTML = '<input type="text" class="x-axis" />';
+        cell2.innerHTML = '<input type="text" class="y-axis" />';
+    });
+
+    document.getElementById("graph-btn").addEventListener("click", function () {
+        var xAxis = [];
+        var yAxis = [];
+        var tableRows = document.querySelectorAll("#data-table tbody tr");
+        tableRows.forEach(function (row) {
+            xAxis.push(row.querySelector(".x-axis").value);
+            yAxis.push(row.querySelector(".y-axis").value);
+        });
+
+        var ctx = document.getElementById('line-chart').getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'line', // Changed type to 'line'
+            data: {
+                labels: xAxis,
+                datasets: [{
+                    label: 'Y Axis',
+                    data: yAxis,
+                    fill: false, // Ensuring no fill under the line
+                    borderColor: 'rgba(54, 162, 235, 1)', // Adjusted line color
+                    borderWidth: 1 // Adjusted line width
+                }]
+            },
+            options: {
+                responsive: false,
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    });
+
+   document.getElementById("save-btn").addEventListener("click", function () {
+    var canvas = document.getElementById('line-chart');
+    var dataURL = canvas.toDataURL('image/png');
+    var a = document.createElement('a');
+    a.href = dataURL;
+    a.download = 'bar_graph.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+});
+</script>
+</body>
+</html>

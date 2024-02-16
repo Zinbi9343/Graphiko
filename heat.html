@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heatmap and Table</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            text-align: center;
+        }
+
+        .table-container {
+            margin-bottom: 10px;
+        }
+
+        #data-table {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        #data-table th, #data-table td {
+            padding: 5px;
+        }
+
+        #data-table input[type="number"] {
+            width: calc(100% - 20px);
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+        #add-row-btn, #graph-btn {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+
+        #add-row-btn:hover, #graph-btn:hover {
+            background-color: #45a049;
+        }
+
+        #heatmap {
+            margin-top: 20px;
+        }
+
+        rect {
+            stroke: #fff;
+        }
+
+        text {
+            font-family: sans-serif;
+            font-size: 12px;
+            fill: black;
+            text-anchor: middle;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="table-container">
+        <table id="data-table">
+            <thead>
+            <tr>
+                <th>X Axis</th>
+                <th>Y Axis</th>
+                <th>Value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><input type="number" class="x-axis"/></td>
+                <td><input type="number" class="y-axis"/></td>
+                <td><input type="number" class="value"/></td>
+            </tr>
+            </tbody>
+        </table>
+        <button id="add-row-btn">➕ Add Data</button>
+    </div>
+    <button id="graph-btn">📊 Generate Heatmap</button>
+</div>
+<svg id="heatmap"></svg>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+    document.getElementById("add-row-btn").addEventListener("click", function () {
+        var table = document.getElementById("data-table").getElementsByTagName("tbody")[0];
+        var newRow = table.insertRow();
+        var cell1 = newRow.insertCell(0);
+        cell1.innerHTML = '<input type="number" class="x-axis" />';
+        var cell2 = newRow.insertCell(1);
+        cell2.innerHTML = '<input type="number" class="y-axis" />';
+        var cell3 = newRow.insertCell(2);
+        cell3.innerHTML = '<input type="number" class="value" />';
+    });
+
+    document.getElementById("graph-btn").addEventListener("click", function () {
+        var data = [];
+        var tableRows = document.querySelectorAll("#data-table tbody tr");
+        tableRows.forEach(function (row) {
+            var x = parseInt(row.querySelector(".x-axis").value);
+            var y = parseInt(row.querySelector(".y-axis").value);
+            var value = parseFloat(row.querySelector(".value").value);
+            data.push({x: x, y: y, value: value});
+        });
+
+        var margin = {top: 30, right: 30, bottom: 30, left: 30},
+            width = 600 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
+
+        var svg = d3.select("#heatmap")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var x = d3.scaleBand()
+            .range([0, width])
+            .domain(data.map(function (d) {
+                return d.x;
+            }))
+            .padding(0.05);
+
+        var y = d3.scaleBand()
+            .range([height, 0])
+            .domain(data.map(function (d) {
+                return d.y;
+            }))
+            .padding(0.05);
+
+        var color = d3.scaleLinear()
+            .range(["white", "steelblue"])
+            .domain([0, d3.max(data, function (d) {
+                return d.value;
+            })]);
+
+        svg.selectAll()
+            .data(data, function (d) {
+                return d.x + ':' + d.y;
+            })
+            .enter()
+            .append("rect")
+            .attr("x", function (d) {
+                return x(d.x);
+            })
+            .attr("y", function (d) {
+                return y(d.y);
+            })
+            .attr("width", x.bandwidth())
+            .attr("height", y.bandwidth())
+            .style("fill", function (d) {
+                return color(d.value);
+            });
+
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x));
+
+        svg.append("g")
+            .call(d3.axisLeft(y));
+    });
+</script>
+</body>
+</html>

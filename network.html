@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Graph and Table</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            text-align: center;
+        }
+
+        .table-container {
+            margin-bottom: 10px;
+        }
+
+        #data-table {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        #data-table th, #data-table td {
+            padding: 5px;
+        }
+
+        #data-table input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+        #add-row-btn, #graph-btn, #save-btn {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+
+        #add-row-btn:hover, #graph-btn:hover, #save-btn:hover {
+            background-color: #45a049;
+        }
+
+        #network-graph {
+            height: 400px;
+            border: 1px solid lightgray;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="table-container">
+        <table id="data-table">
+            <thead>
+            <tr>
+                <th>Node</th>
+                <th>Connected Nodes (comma-separated)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><input type="text" class="node"/></td>
+                <td><input type="text" class="connected-nodes"/></td>
+            </tr>
+            </tbody>
+        </table>
+        <button id="add-row-btn">➕ Add Row</button>
+    </div>
+    <button id="graph-btn">📊 Graph It</button>
+    <button id="save-btn">💾 Save(png)</button>
+</div>
+<div id="network-graph"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis-network.min.js"></script>
+<script>
+    document.getElementById("add-row-btn").addEventListener("click", function () {
+        var table = document.getElementById("data-table").getElementsByTagName("tbody")[0];
+        var newRow = table.insertRow();
+        var cell1 = newRow.insertCell(0);
+        var cell2 = newRow.insertCell(1);
+        cell1.innerHTML = '<input type="text" class="node" />';
+        cell2.innerHTML = '<input type="text" class="connected-nodes" />';
+    });
+
+    document.getElementById("graph-btn").addEventListener("click", function () {
+        var nodes = [];
+        var edges = [];
+        var tableRows = document.querySelectorAll("#data-table tbody tr");
+        tableRows.forEach(function (row) {
+            var node = row.querySelector(".node").value;
+            var connectedNodes = row.querySelector(".connected-nodes").value.split(',');
+            nodes.push({id: node, label: node});
+            connectedNodes.forEach(function (connectedNode) {
+                edges.push({from: node, to: connectedNode.trim()});
+            });
+        });
+
+        var container = document.getElementById('network-graph');
+        var data = {
+            nodes: nodes,
+            edges: edges
+        };
+        var options = {};
+        var network = new vis.Network(container, data, options);
+    });
+
+    document.getElementById("save-btn").addEventListener("click", function () {
+        var container = document.getElementById('network-graph');
+        var dataURL = container.toDataURL('image/png');
+        var a = document.createElement('a');
+        a.href = dataURL;
+        a.download = 'network_graph.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    });
+</script>
+</body>
+</html>

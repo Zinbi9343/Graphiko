@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beautiful Homepage</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-color, #f7f7f7); /* Default background color */
+      background-image: var(--bg-image, none); /* Default background image */
+      background-size: cover;
+      background-position: center;
+      transition: background 0.5s ease;
+    }
+    .container {
+      width: 80%;
+      margin: 100px auto;
+      text-align: center;
+      color: var(--text-color, #333); /* Default text color */
+    }
+    h1 {
+      font-size: 3rem;
+    }
+    p {
+      font-size: 1.2rem;
+      margin-bottom: 40px;
+    }
+    .button {
+      display: inline-block;
+      padding: 15px 30px;
+      background-color: #007bff;
+      color: #fff;
+      font-size: 1.2rem;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Graphiko</h1>
+    <p>Explore and create stunning graphs with ease!</p>
+    <button class="button" onclick="redirectToGraphType()">Create Your Own Graph</button>
+  </div>
+
+  <script>
+    // Fetch a random background image from Unsplash API
+    fetch('https://source.unsplash.com/random/1600x900')
+      .then(response => {
+        document.body.style.setProperty('--bg-image', `url(${response.url})`);
+      })
+      .catch(error => console.error('Error fetching background image:', error));
+
+    function redirectToGraphType() {
+      window.location.href = "types.html";
+    }
+  </script>
+</body>
+</html>

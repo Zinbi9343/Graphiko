@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Box Plot and Table</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            text-align: center;
+        }
+
+        .table-container {
+            margin-bottom: 10px;
+        }
+
+        #data-table {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        #data-table th, #data-table td {
+            padding: 5px;
+        }
+
+        #data-table input[type="number"] {
+            width: calc(100% - 20px);
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+        #add-row-btn, #graph-btn {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+
+        #add-row-btn:hover, #graph-btn:hover {
+            background-color: #45a049;
+        }
+
+        #box-plot {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="table-container">
+        <table id="data-table">
+            <thead>
+            <tr>
+                <th>Value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><input type="number" class="value"/></td>
+            </tr>
+            </tbody>
+        </table>
+        <button id="add-row-btn">➕ Add Value</button>
+    </div>
+    <button id="graph-btn">📊 Generate Box Plot</button>
+</div>
+<svg id="box-plot"></svg>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+    document.getElementById("add-row-btn").addEventListener("click", function () {
+        var table = document.getElementById("data-table").getElementsByTagName("tbody")[0];
+        var newRow = table.insertRow();
+        var cell = newRow.insertCell(0);
+        cell.innerHTML = '<input type="number" class="value" />';
+    });
+
+    document.getElementById("graph-btn").addEventListener("click", function () {
+        var values = [];
+        var tableRows = document.querySelectorAll("#data-table tbody tr");
+        tableRows.forEach(function (row) {
+            var value = parseFloat(row.querySelector(".value").value);
+            values.push(value);
+        });
+
+        // Calculate quartiles and other statistics
+        values.sort((a, b) => a - b);
+        var q1 = d3.quantile(values, 0.25);
+        var median = d3.quantile(values, 0.5);
+        var q3 = d3.quantile(values, 0.75);
+        var iqr = q3 - q1;
+        var min = q1 - 1.5 * iqr;
+        var max = q3 + 1.5 * iqr;
+
+        // Set up dimensions
+        var margin = {top: 10, right: 30, bottom: 30, left: 40},
+            width = 800 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
+
+        // Create SVG
+        var svg = d3.select("#box-plot")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        // Show the Y scale
+        var y = d3.scaleLinear()
+            .domain([d3.min(values), d3.max(values)])
+            .range([height, 0]);
+        svg.call(d3.axisLeft(y));
+
+        // Draw box plot elements
+        svg.selectAll("line").data([min, q1, median, q3, max])
+            .enter()
+            .append("line")
+            .attr("x1", width / 2)
+            .attr("x2", width / 2 + 50)
+            .attr("y1", d => y(d))
+            .attr("y2", d => y(d))
+            .attr("stroke", "black");
+
+        svg.append("rect")
+            .attr("x", width / 2 - 50)
+            .attr("y", y(q3))
+            .attr("width", 100)
+            .attr("height", y(q1) - y(q3))
+            .style("fill", "#69b3a2")
+            .style("stroke", "black");
+
+        svg.append("rect")
+            .attr("x", width / 2 - 50)
+            .attr("y", y(median) - 5)
+            .attr("width", 100)
+            .attr("height", 10)
+            .style("fill", "#000000");
+
+        // Show title
+        svg.append("text")
+            .attr("x", (width / 2))
+            .attr("y", 0 - (margin.top / 2))
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+            .text("Box Plot");
+    });
+</script>
+</body>
+</html>

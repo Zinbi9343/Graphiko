@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histogram and Table</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            text-align: center;
+        }
+
+        .table-container {
+            margin-bottom: 10px;
+        }
+
+        #data-table {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        #data-table th, #data-table td {
+            padding: 5px;
+        }
+
+        #data-table input[type="number"] {
+            width: calc(100% - 20px);
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+        #add-row-btn, #graph-btn, #save-btn {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+
+        #add-row-btn:hover, #graph-btn:hover, #save-btn:hover {
+            background-color: #45a049;
+        }
+
+        #canvas-container {
+            margin-top: 20px;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="table-container">
+        <table id="data-table">
+            <thead>
+            <tr>
+                <th>Label</th>
+                <th>Value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><input type="text" class="label"/></td>
+                <td><input type="number" class="value"/></td>
+            </tr>
+            </tbody>
+        </table>
+        <button id="add-row-btn">➕ Add Row</button>
+    </div>
+    <button id="graph-btn">📊 Graph It</button>
+    <button id="save-btn">💾 Save(png)</button>
+</div>
+<div id="canvas-container">
+    <canvas id="histogram-chart" width="400" height="400"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.getElementById("add-row-btn").addEventListener("click", function () {
+        var table = document.getElementById("data-table").getElementsByTagName("tbody")[0];
+        var newRow = table.insertRow();
+        var cell1 = newRow.insertCell(0);
+        var cell2 = newRow.insertCell(1);
+        cell1.innerHTML = '<input type="text" class="label" />';
+        cell2.innerHTML = '<input type="number" class="value" />';
+    });
+
+    document.getElementById("graph-btn").addEventListener("click", function () {
+        var labels = [];
+        var data = [];
+        var tableRows = document.querySelectorAll("#data-table tbody tr");
+        tableRows.forEach(function (row) {
+            labels.push(row.querySelector(".label").value);
+            data.push(parseFloat(row.querySelector(".value").value));
+        });
+
+        var ctx = document.getElementById('histogram-chart').getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Frequency',
+                    data: data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                }]
+            },
+            options: {
+                responsive: false,
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    });
+
+    document.getElementById("save-btn").addEventListener("click", function () {
+        var canvas = document.getElementById('histogram-chart');
+        var dataURL = canvas.toDataURL('image/png');
+        var a = document.createElement('a');
+        a.href = dataURL;
+        a.download = 'histogram.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    });
+</script>
+</body>
+</html>

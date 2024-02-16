@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tree Graph and Table</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            text-align: center;
+        }
+
+        .table-container {
+            margin-bottom: 10px;
+        }
+
+        #data-table {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        #data-table th, #data-table td {
+            padding: 5px;
+        }
+
+        #data-table input[type="number"] {
+            width: calc(100% - 20px);
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+        #add-row-btn, #graph-btn, #save-btn {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+
+        #add-row-btn:hover, #graph-btn:hover, #save-btn:hover {
+            background-color: #45a049;
+        }
+
+        #tree-graph {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="table-container">
+        <table id="data-table">
+            <thead>
+            <tr>
+                <th>Node Value</th>
+                <th>Parent Node</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><input type="number" class="node-value"/></td>
+                <td><input type="number" class="parent-node"/></td>
+            </tr>
+            </tbody>
+        </table>
+        <button id="add-row-btn">➕ Add Row</button>
+    </div>
+    <button id="graph-btn">🌳 Generate Tree Graph</button>
+</div>
+<div id="tree-graph"></div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+    document.getElementById("add-row-btn").addEventListener("click", function () {
+        var table = document.getElementById("data-table").getElementsByTagName("tbody")[0];
+        var newRow = table.insertRow();
+        var cell1 = newRow.insertCell(0);
+        cell1.innerHTML = '<input type="number" class="node-value" />';
+        var cell2 = newRow.insertCell(1);
+        cell2.innerHTML = '<input type="number" class="parent-node" />';
+    });
+
+    document.getElementById("graph-btn").addEventListener("click", function () {
+        var nodes = [];
+        var links = [];
+        var tableRows = document.querySelectorAll("#data-table tbody tr");
+        tableRows.forEach(function (row) {
+            var nodeValue = parseFloat(row.querySelector(".node-value").value);
+            var parentNode = parseFloat(row.querySelector(".parent-node").value);
+            nodes.push({ id: nodeValue });
+            if (!isNaN(parentNode)) {
+                links.push({ source: parentNode, target: nodeValue });
+            }
+        });
+
+        var width = 600;
+        var height = 400;
+
+        var svg = d3.select("#tree-graph").append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        var simulation = d3.forceSimulation(nodes)
+            .force("link", d3.forceLink(links).id(d => d.id))
+            .force("charge", d3.forceManyBody())
+            .force("center", d3.forceCenter(width / 2, height / 2));
+
+        var link = svg.append("g")
+            .selectAll("line")
+            .data(links)
+            .enter().append("line")
+            .attr("stroke", "#999")
+            .attr("stroke-opacity", 0.6)
+            .attr("stroke-width", "2");
+
+        var node = svg.append("g")
+            .selectAll("circle")
+            .data(nodes)
+            .enter().append("circle")
+            .attr("r", 10)
+            .attr("fill", "#007bff")
+            .call(drag(simulation));
+
+        node.append("title")
+            .text(d => d.id);
+
+        simulation.on("tick", () => {
+            link
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+
+            node
+                .attr("cx", d => d.x)
+                .attr("cy", d => d.y);
+        });
+
+        function drag(simulation) {
+
+            function dragstarted(event) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                event.subject.fx = event.subject.x;
+                event.subject.fy = event.subject.y;
+            }
+
+            function dragged(event) {
+                event.subject.fx = event.x;
+                event.subject.fy = event.y;
+            }
+
+            function dragended(event) {
+                if (!event.active) simulation.alphaTarget(0);
+                event.subject.fx = null;
+                event.subject.fy = null;
+            }
+
+            return d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended);
+        }
+    });
+</script>
+</body>
+</html>

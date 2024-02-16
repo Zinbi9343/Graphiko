@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gantt Chart and Table</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            text-align: center;
+        }
+
+        .table-container {
+            margin-bottom: 10px;
+        }
+
+        #data-table {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        #data-table th, #data-table td {
+            padding: 5px;
+        }
+
+        #data-table input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+        #add-row-btn, #graph-btn {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+
+        #add-row-btn:hover, #graph-btn:hover {
+            background-color: #45a049;
+        }
+
+        #gantt-chart {
+            margin-top: 20px;
+        }
+
+        .task-bar {
+            fill: steelblue;
+        }
+
+        .task-text {
+            fill: black;
+            font-size: 12px;
+            text-anchor: middle;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="table-container">
+        <table id="data-table">
+            <thead>
+            <tr>
+                <th>Task</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><input type="text" class="task"/></td>
+                <td><input type="date" class="start-date"/></td>
+                <td><input type="date" class="end-date"/></td>
+            </tr>
+            </tbody>
+        </table>
+        <button id="add-row-btn">➕ Add Task</button>
+    </div>
+    <button id="graph-btn">📊 Generate Gantt Chart</button>
+</div>
+<svg id="gantt-chart"></svg>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+    document.getElementById("add-row-btn").addEventListener("click", function () {
+        var table = document.getElementById("data-table").getElementsByTagName("tbody")[0];
+        var newRow = table.insertRow();
+        var cell1 = newRow.insertCell(0);
+        cell1.innerHTML = '<input type="text" class="task" />';
+        var cell2 = newRow.insertCell(1);
+        cell2.innerHTML = '<input type="date" class="start-date" />';
+        var cell3 = newRow.insertCell(2);
+        cell3.innerHTML = '<input type="date" class="end-date" />';
+    });
+
+    document.getElementById("graph-btn").addEventListener("click", function () {
+        var tasks = [];
+        var tableRows = document.querySelectorAll("#data-table tbody tr");
+        tableRows.forEach(function (row) {
+            var taskName = row.querySelector(".task").value;
+            var startDate = new Date(row.querySelector(".start-date").value);
+            var endDate = new Date(row.querySelector(".end-date").value);
+            tasks.push({ name: taskName, start: startDate, end: endDate });
+        });
+
+        var margin = { top: 20, right: 30, bottom: 30, left: 40 };
+        var width = 800 - margin.left - margin.right;
+        var height = 400 - margin.top - margin.bottom;
+
+        var svg = d3.select("#gantt-chart")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var x = d3.scaleTime()
+            .domain([d3.min(tasks, d => d.start), d3.max(tasks, d => d.end)])
+            .range([0, width]);
+
+        var y = d3.scaleBand()
+            .domain(tasks.map(d => d.name))
+            .range([0, height])
+            .padding(0.1);
+
+        var xAxis = d3.axisBottom(x);
+        var yAxis = d3.axisLeft(y);
+
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+
+        svg.append("g")
+            .call(yAxis);
+
+        svg.selectAll(".task-bar")
+            .data(tasks)
+            .enter().append("rect")
+            .attr("class", "task-bar")
+            .attr("x", d => x(d.start))
+            .attr("y", d => y(d.name))
+            .attr("width", d => x(d.end) - x(d.start))
+            .attr("height", y.bandwidth());
+
+        svg.selectAll(".task-text")
+            .data(tasks)
+            .enter().append("text")
+            .attr("class", "task-text")
+            .attr("x", d => x(d.start) + 5)
+            .attr("y", d => y(d.name) + y.bandwidth() / 2)
+            .attr("dy", "0.35em")
+            .text(d => d.name);
+    });
+</script>
+</body>
+</html>

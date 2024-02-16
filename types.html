@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Select Your Type</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> <!-- Font Awesome CDN -->
+<style>
+
+.button-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.button-container button {
+  width: 100%;
+  padding: 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 10px;
+  background-color: #3f4a7d;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button-container button:hover {
+  background-color: #0056b3;
+}
+
+.button-container img {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+}
+</style>
+</head>
+<body>
+<h1>Select Your Type</h1>
+<div class="button-container">
+  <button onclick="redirectToPage('pie.html')"><i class="fas fa-chart-pie"></i> Pie Chart</button>
+  <button onclick="redirectToPage('scatter.html')"><i class="fas fa-chart-scatter"></i> Scatter Plot</button>
+  <button onclick="redirectToPage('histo.html')"><i class="fas fa-chart-bar"></i> Histogram</button>
+  <button onclick="redirectToPage('area.html')"><i class="fas fa-chart-area"></i> Area Chart</button>
+  <button onclick="redirectToPage('box.html')"><i class="fas fa-chart-box"></i> Box Plot</button>
+  <button onclick="redirectToPage('network.html')"><i class="fas fa-network-wired"></i> Network Graph</button>
+  <button onclick="redirectToPage('polar.html')"><i class="fas fa-chart-polar"></i> Polar Plot</button>
+  <button onclick="redirectToPage('heat.html')"><i class="fas fa-thermometer"></i> Heatmap</button>
+  <button onclick="redirectToPage('gantt.html')"><i class="fas fa-chart-timeline"></i> Gantt Chart</button>
+  <button onclick="redirectToPage('tree.html')"><i class="fas fa-sitemap"></i> Treemap</button>
+  <button onclick="redirectToPage('bubble.html')"><i class="fas fa-chart-bubble"></i> Bubble Chart</button>
+  <button onclick="redirectToPage('line.html')"><i class="fas fa-chart-line"></i> Streamgraph</button>
+</div>
+
+<script>
+function redirectToPage(pageUrl) {
+  window.location.href = pageUrl;
+}
+</script>
+</body>
+</html>
